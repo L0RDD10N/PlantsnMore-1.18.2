@@ -1,0 +1,6 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "plantsnmore:item/monst_del_fruit_edible"
+  }
+}

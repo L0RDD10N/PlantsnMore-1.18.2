@@ -1,0 +1,18 @@
+{
+  "item.plantsnmore.monst_del_seeds": "Monstera Deliciosa seeds",
+  "item.plantsnmore.monst_del_var_seeds": "Monstera Deliciosa var. seeds",
+  "item.plantsnmore.monst_del_var": "Monstera Deliciosa var.",
+  "item.plantsnmore.monst_del_fruit": "Monstera Deliciosa fruit",
+  "item.plantsnmore.monst_del_var_fruit": "Monstera Deliciosa var. fruit",
+  "item.plantsnmore.monst_del_fruit_edible": "Monstera Deliciosa Fruit Pieces",
+
+
+
+  "block.plantsnmore.deco_pot": "Deco Pot",
+
+
+  "itemGroup.plantstab": "Plants'n'More Plants",
+  "itemGroup.seedstab": "Plants'n'More Seeds",
+  "itemGroup.potstab": "Plants'n'More Pots",
+  "itemGroup.foodtab": "Plants'n'More Foods"
+}
