@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "plantsnmore:block/coco_palm_sapling"
+  }
+}

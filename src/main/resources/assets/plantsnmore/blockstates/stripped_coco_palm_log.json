@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "plantsnmore:block/stripped_coco_palm_log_horizontal",
+      "x": 90,
+      "y": 90
+    },
+    "axis=y": {
+      "model": "plantsnmore:block/stripped_coco_palm_log"
+    },
+    "axis=z": {
+      "model": "plantsnmore:block/stripped_coco_palm_log_horizontal",
+      "x": 90
+    }
+  }
+}

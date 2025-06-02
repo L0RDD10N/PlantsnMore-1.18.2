@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/leaves",
+  "textures": {
+    "all": "plantsnmore:block/coco_palm_leaves"
+  }
+}

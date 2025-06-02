@@ -1,0 +1,29 @@
+{
+  "type": "plantsnmore:plant_station_craft",
+  "pattern": [
+    "WKB",
+    "PPB",
+    "CCC"
+  ],
+  "key": {
+    "W": {
+      "item": "plantsnmore:worm_casting"
+    },
+    "K": {
+      "item": "plantsnmore:biochar"
+    },
+    "P": {
+      "item": "plantsnmore:perlite"
+    },
+    "B": {
+      "item": "plantsnmore:pine_bark"
+    },
+    "C": {
+      "item": "plantsnmore:coco_fiber"
+    }
+  },
+  "output": {
+    "item": "plantsnmore:aeroid_mix",
+    "count": 1
+  }
+}

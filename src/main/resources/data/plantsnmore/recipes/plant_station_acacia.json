@@ -1,0 +1,28 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "PIP",
+    "LBL",
+    "LCL"
+  ],
+  "key": {
+    "P": {
+      "item": "minecraft:acacia_planks"
+    },
+    "I": {
+      "item": "minecraft:iron_block"
+    },
+    "L": {
+      "item": "minecraft:acacia_log"
+    },
+    "B": {
+      "item": "minecraft:polished_blackstone"
+    },
+    "C": {
+      "item": "minecraft:brown_concrete"
+    }
+  },
+  "result": {
+    "item": "plantsnmore:plant_station_oak"
+  }
+}

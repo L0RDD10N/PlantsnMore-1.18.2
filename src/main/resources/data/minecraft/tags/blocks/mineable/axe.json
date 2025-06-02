@@ -1,5 +1,13 @@
 {
   "replace": false,
   "values": [
+    "plantsnmore:plant_station_oak",
+    "plantsnmore:plant_station_birch",
+    "plantsnmore:plant_station_dark_oak",
+    "plantsnmore:plant_station_crimson",
+    "plantsnmore:plant_station_acacia",
+    "plantsnmore:plant_station_jungle",
+    "plantsnmore:plant_station_spruce",
+    "plantsnmore:plant_station_warped"
   ]
 }

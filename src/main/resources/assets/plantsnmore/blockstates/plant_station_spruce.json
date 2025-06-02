@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model" :  "plantsnmore:block/plant_station_spruce" },
+    "facing=east": { "model" :  "plantsnmore:block/plant_station_spruce", "y": 90 },
+    "facing=south": { "model" :  "plantsnmore:block/plant_station_spruce", "y": 180 },
+    "facing=west": { "model" :  "plantsnmore:block/plant_station_spruce", "y":  270}
+  }
+}

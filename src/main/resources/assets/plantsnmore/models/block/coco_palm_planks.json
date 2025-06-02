@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "plantsnmore:block/coco_palm_planks"
+  }
+}

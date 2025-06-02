@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "plantsnmore:block/stripped_coco_palm_log_top",
+    "side": "plantsnmore:block/stripped_coco_palm_log"
+  }
+}

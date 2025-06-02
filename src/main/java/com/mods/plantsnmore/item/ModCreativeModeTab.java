@@ -34,5 +34,12 @@ public class ModCreativeModeTab {
         }
     };
 
+    public static final CreativeModeTab MISC_TAB = new CreativeModeTab("misctab") {
+        @Override
+        public ItemStack makeIcon() {
+            return new ItemStack(ModBlocks.PLANT_STATION_OAK.get());
+        }
+    };
+
 
 }

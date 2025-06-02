@@ -1,18 +1,44 @@
 {
-  "item.plantsnmore.monst_del_seeds": "Monstera Deliciosa seeds",
-  "item.plantsnmore.monst_del_var_seeds": "Monstera Deliciosa var. seeds",
+  "item.plantsnmore.monst_del_seeds": "Monstera Deliciosa Seeds",
+  "item.plantsnmore.monst_del_var_seeds": "Monstera Deliciosa var. Seeds",
   "item.plantsnmore.monst_del_var": "Monstera Deliciosa var.",
-  "item.plantsnmore.monst_del_fruit": "Monstera Deliciosa fruit",
-  "item.plantsnmore.monst_del_var_fruit": "Monstera Deliciosa var. fruit",
+  "item.plantsnmore.monst_del_fruit": "Monstera Deliciosa Fruit",
+  "item.plantsnmore.monst_del_var_fruit": "Monstera Deliciosa var. Fruit",
   "item.plantsnmore.monst_del_fruit_edible": "Monstera Deliciosa Fruit Pieces",
-
-
+  "item.plantsnmore.pine_bark": "Pine Bark",
+  "item.plantsnmore.bark_peeler": "Bark Peeler",
 
   "block.plantsnmore.deco_pot": "Deco Pot",
+  "block.plantsnmore.monst_del_age0": "Monstera Deliciosa Stg. 1",
+  "block.plantsnmore.monst_del_age1": "Monstera Deliciosa Stg. 2",
+  "block.plantsnmore.monst_del_age2": "Monstera Deliciosa Stg. 3",
 
+  "block.plantsnmore.plant_station_oak": "Oak Plant Station",
+  "block.plantsnmore.plant_station_dark_oak": "Dark Oak Plant Station",
+  "block.plantsnmore.plant_station_birch": "Birch Plant Station",
+  "block.plantsnmore.plant_station_spruce": "Spruce Plant Station",
+  "block.plantsnmore.plant_station_crimson": "Crimson Plant Station",
+  "block.plantsnmore.plant_station_warped": "Warped Plant Station",
+  "block.plantsnmore.plant_station_jungle": "Jungle Plant Station",
+  "block.plantsnmore.plant_station_acacia": "Acacia Plant Station",
+
+  "block.plantsnmore.coco_palm_log": "Coco Palm Log",
+  "block.plantsnmore.coco_palm_planks": "Coco Palm Planks",
+  "block.plantsnmore.coco_palm_wood": "Coco Palm Wood",
+  "block.plantsnmore.stripped_coco_palm_log": "Stripped Coco Palm Log",
+  "block.plantsnmore.stripped_coco_palm_wood": "Stripped Coco Palm Wood",
+  "block.plantsnmore.coco_palm_leaves": "Coco Palm Leaves",
+  "block.plantsnmore.coco_palm_sapling": "Coco Palm Sapling",
+
+  "block.plantsnmore.aeroid_mix": "Aeroid Mix",
+  "block.plantsnmore.biochar": "Bio-Charcoal",
+  "block.plantsnmore.coco_fiber": "Coco Fiber",
+  "block.plantsnmore.perlite": "Perlite",
+  "block.plantsnmore.worm_casting": "Worm Castings",
 
   "itemGroup.plantstab": "Plants'n'More Plants",
   "itemGroup.seedstab": "Plants'n'More Seeds",
   "itemGroup.potstab": "Plants'n'More Pots",
-  "itemGroup.foodtab": "Plants'n'More Foods"
+  "itemGroup.foodtab": "Plants'n'More Foods",
+  "itemGroup.misctab": "Plants'n'More Misc"
 }

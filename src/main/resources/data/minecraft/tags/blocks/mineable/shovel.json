@@ -1,5 +1,10 @@
 {
   "replace": false,
   "values": [
+    "plantsnmore:aeroid_mix",
+    "plantsnmore:biochar",
+    "plantsnmore:coco_fiber",
+    "plantsnmore:perlite",
+    "plantsnmore:worm_casting"
   ]
 }

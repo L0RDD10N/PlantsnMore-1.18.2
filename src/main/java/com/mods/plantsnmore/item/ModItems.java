@@ -31,6 +31,12 @@ public class ModItems {
     public static final RegistryObject<Item> MONST_DEL_FRUIT_EDIBLE = ITEMS.register("monst_del_fruit_edible",
             () -> new Item(new Item.Properties().tab(ModCreativeModeTab.FOOD_TAB).food(ModFoods.MONST_DEL_FRUIT_EDIBLE)));
 
+    public static final RegistryObject<Item> PINE_BARK = ITEMS.register("pine_bark",
+            () -> new Item(new Item.Properties().tab(ModCreativeModeTab.MISC_TAB)));
+
+    public static final RegistryObject<Item> BARK_PEELER = ITEMS.register("bark_peeler",
+            () -> new Item(new Item.Properties().tab(ModCreativeModeTab.MISC_TAB).durability(35)));
+
     public  static void register(IEventBus eventBus) {
         ITEMS.register(eventBus);
     }

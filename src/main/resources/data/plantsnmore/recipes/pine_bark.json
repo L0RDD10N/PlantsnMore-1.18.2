@@ -1,0 +1,17 @@
+{
+  "type": "plantsnmore:plant_station_craft",
+  "ingredients": [
+    {
+      "item": "minecraft:spruce_log"
+    }
+  ],
+  "tools": [
+    {
+      "item": "plantsnmore:bark_peeler"
+    }
+  ],
+  "output": {
+    "item": "plantsnmore:pine_bark",
+    "count": 9
+  }
+}
