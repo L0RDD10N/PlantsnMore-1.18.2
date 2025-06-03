@@ -1,6 +1,7 @@
 package com.mods.plantsnmore.world.feature.gen;
 
 import com.mods.plantsnmore.world.feature.ModConfiguredFeatures;
+import com.mods.plantsnmore.world.feature.ModPlacedFeatures;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.biome.Biome;
@@ -28,29 +29,29 @@ public class ModTreeGeneration {
         // Standard Strand-Palmen in Beach-Biomen
         if (isBeachBiome(event, biomeKey)) {
             event.getGeneration().addFeature(GenerationStep.Decoration.VEGETAL_DECORATION,
-                    ModConfiguredFeatures.COCO_PALM_BEACH_PLACED.getHolder().get());
+                    ModPlacedFeatures.COCO_PALM_BEACH_PLACED.getHolder().get());
 
             // Seltener: Gekrümmte Palmen für mehr Variation
             event.getGeneration().addFeature(GenerationStep.Decoration.VEGETAL_DECORATION,
-                    ModConfiguredFeatures.CURVED_PALM_BEACH_PLACED.getHolder().get());
+                    ModPlacedFeatures.CURVED_PALM_BEACH_PLACED.getHolder().get());
         }
 
         // Sturm-gebeutelte Palmen an windigen Küsten
         if (isStormyCoastBiome(event, biomeKey)) {
             event.getGeneration().addFeature(GenerationStep.Decoration.VEGETAL_DECORATION,
-                    ModConfiguredFeatures.STORM_PALM_COAST_PLACED.getHolder().get());
+                    ModPlacedFeatures.STORM_PALM_COAST_PLACED.getHolder().get());
         }
 
         // Seltene Oasen-Palmen in Wüsten
         if (isDesertBiome(event, biomeKey)) {
             event.getGeneration().addFeature(GenerationStep.Decoration.VEGETAL_DECORATION,
-                    ModConfiguredFeatures.COCO_PALM_OASIS_PLACED.getHolder().get());
+                    ModPlacedFeatures.COCO_PALM_OASIS_PLACED.getHolder().get());
         }
 
         // Häufigere tropische Palmen in Dschungel-Biomen
         if (isTropicalBiome(event, biomeKey)) {
             event.getGeneration().addFeature(GenerationStep.Decoration.VEGETAL_DECORATION,
-                    ModConfiguredFeatures.COCO_PALM_TROPICAL_PLACED.getHolder().get());
+                    ModPlacedFeatures.COCO_PALM_TROPICAL_PLACED.getHolder().get());
         }
     }
 

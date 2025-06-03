@@ -7,7 +7,7 @@ import com.mods.plantsnmore.recipe.ModRecipes;
 import com.mods.plantsnmore.screen.ModMenuTypes;
 import com.mods.plantsnmore.screen.PlantStationScreen;
 import com.mods.plantsnmore.world.feature.ModConfiguredFeatures;
-import com.mods.plantsnmore.world.feature.gen.ModOreGeneration;
+import com.mods.plantsnmore.world.feature.ModPlacedFeatures;
 import com.mods.plantsnmore.world.feature.tree.ModFoliagePlacers;
 import com.mods.plantsnmore.world.feature.tree.ModTreeDecorators;
 import com.mods.plantsnmore.world.feature.tree.ModTrunkPlacers;
@@ -17,13 +17,11 @@ import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.slf4j.Logger;
-import net.minecraftforge.event.world.BiomeLoadingEvent;
 
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod(PlantsnMore.MOD_ID)
@@ -37,6 +35,10 @@ public class PlantsnMore {
         eventBus.addListener(this::setup);
         eventBus.addListener(this::clientSetup);
 
+        // Register configured features and placed features
+        ModConfiguredFeatures.register(eventBus);
+        ModPlacedFeatures.register(eventBus); // ADD THIS LINE
+
         ModItems.register(eventBus);
         ModBlocks.register(eventBus);
 
@@ -48,10 +50,7 @@ public class PlantsnMore {
         // Register tree-related features
         ModTreeDecorators.TREE_DECORATORS.register(eventBus);
         ModFoliagePlacers.FOLIAGE_PLACERS.register(eventBus);
-        ModTrunkPlacers.TRUNK_PLACERS.register(eventBus);
-
-        // Register configured features - THIS WAS MISSING!
-        ModConfiguredFeatures.register(eventBus);
+        ModTrunkPlacers.register(eventBus);
 
         MinecraftForge.EVENT_BUS.register(this);
     }

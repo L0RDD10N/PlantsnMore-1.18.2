@@ -5,15 +5,10 @@ import com.mods.plantsnmore.block.ModBlocks;
 import com.mods.plantsnmore.world.feature.tree.CoconutTreeDecorator;
 import com.mods.plantsnmore.world.feature.tree.PalmFoliagePlacer;
 import com.mods.plantsnmore.world.feature.tree.CurvedPalmTrunkPlacer;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
-import net.minecraft.data.worldgen.placement.PlacementUtils;
 import net.minecraft.util.valueproviders.ConstantInt;
-import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.WeightedPlacedFeature;
@@ -21,7 +16,6 @@ import net.minecraft.world.level.levelgen.feature.configurations.*;
 import net.minecraft.world.level.levelgen.feature.featuresize.TwoLayersFeatureSize;
 import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
 import net.minecraft.world.level.levelgen.feature.trunkplacers.StraightTrunkPlacer;
-import net.minecraft.world.level.levelgen.placement.*;
 import net.minecraft.world.level.levelgen.structure.templatesystem.BlockMatchTest;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
@@ -31,34 +25,33 @@ import java.util.List;
 
 public class ModConfiguredFeatures {
 
-    // Fix: Use Registry.CONFIGURED_FEATURE instead of ForgeRegistries.CONFIGURED_FEATURES
     public static final DeferredRegister<ConfiguredFeature<?, ?>> CONFIGURED_FEATURES =
             DeferredRegister.create(Registry.CONFIGURED_FEATURE_REGISTRY, PlantsnMore.MOD_ID);
 
-    // Fix: Use Registry.PLACED_FEATURE instead of ForgeRegistries.PLACED_FEATURES
-    public static final DeferredRegister<PlacedFeature> PLACED_FEATURES =
-            DeferredRegister.create(Registry.PLACED_FEATURE_REGISTRY, PlantsnMore.MOD_ID);
-
-    // Worm Casting - ersetzt Dirt und Grass Blocks
-    public static final List<OreConfiguration.TargetBlockState> OVERWORLD_WORM_CASTING = List.of(
-            OreConfiguration.target(new BlockMatchTest(Blocks.DIRT), ModBlocks.WORM_CASTING.get().defaultBlockState()),
-            OreConfiguration.target(new BlockMatchTest(Blocks.COARSE_DIRT), ModBlocks.WORM_CASTING.get().defaultBlockState()),
-            OreConfiguration.target(new BlockMatchTest(Blocks.ROOTED_DIRT), ModBlocks.WORM_CASTING.get().defaultBlockState())
-    );
+    // FIXED: Create supplier functions instead of accessing .get() during static initialization
+    private static List<OreConfiguration.TargetBlockState> getOverworldWormCastingTargets() {
+        return List.of(
+                OreConfiguration.target(new BlockMatchTest(Blocks.DIRT), ModBlocks.WORM_CASTING.get().defaultBlockState()),
+                OreConfiguration.target(new BlockMatchTest(Blocks.COARSE_DIRT), ModBlocks.WORM_CASTING.get().defaultBlockState()),
+                OreConfiguration.target(new BlockMatchTest(Blocks.ROOTED_DIRT), ModBlocks.WORM_CASTING.get().defaultBlockState())
+        );
+    }
 
     public static final RegistryObject<ConfiguredFeature<?, ?>> WORM_CASTING = CONFIGURED_FEATURES.register("worm_casting",
-            () -> new ConfiguredFeature<>(Feature.ORE, new OreConfiguration(OVERWORLD_WORM_CASTING, 7)));
+            () -> new ConfiguredFeature<>(Feature.ORE, new OreConfiguration(getOverworldWormCastingTargets(), 7)));
 
-    // Perlite - ersetzt Sand und Sandstone
-    public static final List<OreConfiguration.TargetBlockState> OVERWORLD_PERLITE = List.of(
-            OreConfiguration.target(new BlockMatchTest(Blocks.SAND), ModBlocks.PERLITE.get().defaultBlockState()),
-            OreConfiguration.target(new BlockMatchTest(Blocks.SANDSTONE), ModBlocks.PERLITE.get().defaultBlockState()),
-            OreConfiguration.target(new BlockMatchTest(Blocks.RED_SAND), ModBlocks.PERLITE.get().defaultBlockState()),
-            OreConfiguration.target(new BlockMatchTest(Blocks.RED_SANDSTONE), ModBlocks.PERLITE.get().defaultBlockState())
-    );
+    // FIXED: Same fix for Perlite
+    private static List<OreConfiguration.TargetBlockState> getOverworldPerliteTargets() {
+        return List.of(
+                OreConfiguration.target(new BlockMatchTest(Blocks.SAND), ModBlocks.PERLITE.get().defaultBlockState()),
+                OreConfiguration.target(new BlockMatchTest(Blocks.SANDSTONE), ModBlocks.PERLITE.get().defaultBlockState()),
+                OreConfiguration.target(new BlockMatchTest(Blocks.RED_SAND), ModBlocks.PERLITE.get().defaultBlockState()),
+                OreConfiguration.target(new BlockMatchTest(Blocks.RED_SANDSTONE), ModBlocks.PERLITE.get().defaultBlockState())
+        );
+    }
 
     public static final RegistryObject<ConfiguredFeature<?, ?>> PERLITE = CONFIGURED_FEATURES.register("perlite",
-            () -> new ConfiguredFeature<>(Feature.ORE, new OreConfiguration(OVERWORLD_PERLITE, 6)));
+            () -> new ConfiguredFeature<>(Feature.ORE, new OreConfiguration(getOverworldPerliteTargets(), 6)));
 
     // ========================= STRAIGHT PALM TREES =========================
 
@@ -201,82 +194,9 @@ public class ModConfiguredFeatures {
                     .build()));
 
     // ========================= PALM GROUPS =========================
-
-    // Standard Palmen-Gruppe - mehr gerade Palmen
-    public static final RegistryObject<ConfiguredFeature<?, ?>> COCO_PALM_GROUP = CONFIGURED_FEATURES.register("coco_palm_group",
-            () -> new ConfiguredFeature<>(Feature.RANDOM_SELECTOR, new RandomFeatureConfiguration(List.of(
-                    new WeightedPlacedFeature(PlacementUtils.inlinePlaced(COCO_PALM_SMALL.getHolder().get()), 0.4f),
-                    new WeightedPlacedFeature(PlacementUtils.inlinePlaced(COCO_PALM_MEDIUM.getHolder().get()), 0.25f),
-                    new WeightedPlacedFeature(PlacementUtils.inlinePlaced(COCO_PALM_LARGE.getHolder().get()), 0.15f),
-                    new WeightedPlacedFeature(PlacementUtils.inlinePlaced(CURVED_PALM_SMALL_LIGHT.getHolder().get()), 0.1f),
-                    new WeightedPlacedFeature(PlacementUtils.inlinePlaced(CURVED_PALM_MEDIUM_NORMAL.getHolder().get()), 0.05f)),
-                    PlacementUtils.inlinePlaced(COCO_PALM_ROYAL.getHolder().get())))); // 5% Chance für Königspalme
-
-    // Gekrümmte Palmen-Gruppe - nur gekrümmte Varianten
-    public static final RegistryObject<ConfiguredFeature<?, ?>> CURVED_PALM_GROUP = CONFIGURED_FEATURES.register("curved_palm_group",
-            () -> new ConfiguredFeature<>(Feature.RANDOM_SELECTOR, new RandomFeatureConfiguration(List.of(
-                    new WeightedPlacedFeature(PlacementUtils.inlinePlaced(CURVED_PALM_SMALL_LIGHT.getHolder().get()), 0.3f),
-                    new WeightedPlacedFeature(PlacementUtils.inlinePlaced(CURVED_PALM_MEDIUM_NORMAL.getHolder().get()), 0.25f),
-                    new WeightedPlacedFeature(PlacementUtils.inlinePlaced(CURVED_PALM_LARGE_STRONG_EAST.getHolder().get()), 0.15f),
-                    new WeightedPlacedFeature(PlacementUtils.inlinePlaced(CURVED_PALM_LARGE_STRONG_WEST.getHolder().get()), 0.15f),
-                    new WeightedPlacedFeature(PlacementUtils.inlinePlaced(CURVED_PALM_WINDSWEPT.getHolder().get()), 0.1f)),
-                    PlacementUtils.inlinePlaced(CURVED_PALM_ROYAL_EXTREME.getHolder().get())))); // 5% für extreme Königspalme
-
-    // Sturm-gebeutelte Küstenpalmen - hauptsächlich windgebeugte Varianten
-    public static final RegistryObject<ConfiguredFeature<?, ?>> STORM_PALM_GROUP = CONFIGURED_FEATURES.register("storm_palm_group",
-            () -> new ConfiguredFeature<>(Feature.RANDOM_SELECTOR, new RandomFeatureConfiguration(List.of(
-                    new WeightedPlacedFeature(PlacementUtils.inlinePlaced(CURVED_PALM_WINDSWEPT.getHolder().get()), 0.4f),
-                    new WeightedPlacedFeature(PlacementUtils.inlinePlaced(CURVED_PALM_LARGE_STRONG_EAST.getHolder().get()), 0.2f),
-                    new WeightedPlacedFeature(PlacementUtils.inlinePlaced(CURVED_PALM_LARGE_STRONG_WEST.getHolder().get()), 0.2f),
-                    new WeightedPlacedFeature(PlacementUtils.inlinePlaced(CURVED_PALM_MEDIUM_NORMAL.getHolder().get()), 0.15f)),
-                    PlacementUtils.inlinePlaced(CURVED_PALM_ROYAL_EXTREME.getHolder().get())))); // 5% für extreme Variante
-
-    // =========================== PLACED FEATURES ===========================
-
-    public static final RegistryObject<PlacedFeature> COCO_PALM_BEACH_PLACED = PLACED_FEATURES.register("coco_palm_beach_placed",
-            () -> new PlacedFeature(COCO_PALM_GROUP.getHolder().get(), List.of(
-                    RarityFilter.onAverageOnceEvery(12),
-                    InSquarePlacement.spread(),
-                    PlacementUtils.HEIGHTMAP_OCEAN_FLOOR,
-                    BiomeFilter.biome(),
-                    BlockPredicateFilter.forPredicate(BlockPredicate.wouldSurvive(
-                            ModBlocks.COCO_PALM_LOG.get().defaultBlockState(), BlockPos.ZERO)))));
-
-    public static final RegistryObject<PlacedFeature> CURVED_PALM_BEACH_PLACED = PLACED_FEATURES.register("curved_palm_beach_placed",
-            () -> new PlacedFeature(CURVED_PALM_GROUP.getHolder().get(), List.of(
-                    RarityFilter.onAverageOnceEvery(20), // seltener als normale Palmen
-                    InSquarePlacement.spread(),
-                    PlacementUtils.HEIGHTMAP_OCEAN_FLOOR,
-                    BiomeFilter.biome(),
-                    BlockPredicateFilter.forPredicate(BlockPredicate.wouldSurvive(
-                            ModBlocks.COCO_PALM_LOG.get().defaultBlockState(), BlockPos.ZERO)))));
-
-    public static final RegistryObject<PlacedFeature> STORM_PALM_COAST_PLACED = PLACED_FEATURES.register("storm_palm_coast_placed",
-            () -> new PlacedFeature(STORM_PALM_GROUP.getHolder().get(), List.of(
-                    RarityFilter.onAverageOnceEvery(30), // sehr selten für dramatische Küstenabschnitte
-                    InSquarePlacement.spread(),
-                    PlacementUtils.HEIGHTMAP_OCEAN_FLOOR,
-                    BiomeFilter.biome(),
-                    BlockPredicateFilter.forPredicate(BlockPredicate.wouldSurvive(
-                            ModBlocks.COCO_PALM_LOG.get().defaultBlockState(), BlockPos.ZERO)))));
-
-    public static final RegistryObject<PlacedFeature> COCO_PALM_OASIS_PLACED = PLACED_FEATURES.register("coco_palm_oasis_placed",
-            () -> new PlacedFeature(COCO_PALM_GROUP.getHolder().get(), List.of(
-                    RarityFilter.onAverageOnceEvery(300),
-                    InSquarePlacement.spread(),
-                    PlacementUtils.HEIGHTMAP_WORLD_SURFACE,
-                    RandomOffsetPlacement.horizontal(UniformInt.of(-6, 6)),
-                    BiomeFilter.biome())));
-
-    public static final RegistryObject<PlacedFeature> COCO_PALM_TROPICAL_PLACED = PLACED_FEATURES.register("coco_palm_tropical_placed",
-            () -> new PlacedFeature(COCO_PALM_MEDIUM.getHolder().get(), List.of(
-                    RarityFilter.onAverageOnceEvery(8),
-                    InSquarePlacement.spread(),
-                    PlacementUtils.HEIGHTMAP_WORLD_SURFACE,
-                    BiomeFilter.biome())));
+    // NOTE: These groups will be referenced by placed features, not inline
 
     public static void register(IEventBus eventBus) {
         CONFIGURED_FEATURES.register(eventBus);
-        PLACED_FEATURES.register(eventBus);
     }
 }

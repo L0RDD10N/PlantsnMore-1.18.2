@@ -5,8 +5,6 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.util.valueproviders.ConstantInt;
-import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.world.level.LevelSimulatedReader;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
@@ -24,15 +22,14 @@ public class CurvedPalmTrunkPlacer extends TrunkPlacer {
         return trunkPlacerParts(instance).and(
                 instance.group(
                         Codec.floatRange(0.0f, 2.0f).fieldOf("curve_strength").forGetter(placer -> placer.curveStrength),
-                        Codec.intRange(0, 3).fieldOf("curve_direction").forGetter(placer -> placer.curveDirection),
+                        Codec.intRange(-1, 3).fieldOf("curve_direction").forGetter(placer -> placer.curveDirection), // -1 for random
                         Codec.floatRange(0.0f, 1.0f).fieldOf("randomness").forGetter(placer -> placer.randomness)
                 )
-        ).apply(instance, (baseHeight, heightRandA, heightRandB, curveStrength, curveDirection, randomness) ->
-                new CurvedPalmTrunkPlacer(baseHeight, heightRandA, heightRandB, curveStrength, curveDirection, randomness));
+        ).apply(instance, CurvedPalmTrunkPlacer::new);
     });
 
     private final float curveStrength; // 0.0 = gerade, 2.0 = stark gekrümmt
-    private final int curveDirection; // 0-3 für Hauptrichtungen
+    private final int curveDirection; // -1 = random, 0-3 für Hauptrichtungen (N,S,E,W)
     private final float randomness; // Zufällige Variation
 
     public CurvedPalmTrunkPlacer(int baseHeight, int heightRandA, int heightRandB,
@@ -61,7 +58,7 @@ public class CurvedPalmTrunkPlacer extends TrunkPlacer {
         double currentX = startPos.getX();
         double currentZ = startPos.getZ();
 
-        // Curve-Parameter
+        // Curve-Parameter mit etwas mehr Variation
         double totalCurve = curveStrength + (random.nextFloat() - 0.5f) * randomness;
 
         BlockPos lastPos = startPos;
@@ -69,7 +66,7 @@ public class CurvedPalmTrunkPlacer extends TrunkPlacer {
         for (int i = 0; i < height; i++) {
             double progress = (double) i / height;
 
-            // Berechne Krümmung (S-Kurve oder kontinuierliche Kurve)
+            // Berechne Krümmung (verschiedene Kurven-Arten je nach Stärke)
             double curveOffset = calculateCurveOffset(progress, totalCurve, height);
 
             // Anwenden der Krümmung in die gewählte Richtung
@@ -81,17 +78,27 @@ public class CurvedPalmTrunkPlacer extends TrunkPlacer {
                 case SOUTH: offsetZ = curveOffset; break;
                 case EAST: offsetX = curveOffset; break;
                 case WEST: offsetX = -curveOffset; break;
+                default: break; // Fallback für unerwartete Richtungen
             }
 
             // Kleine zufällige Variation für natürlicheren Look
-            offsetX += (random.nextFloat() - 0.5f) * randomness * 0.5;
-            offsetZ += (random.nextFloat() - 0.5f) * randomness * 0.5;
+            if (randomness > 0) {
+                offsetX += (random.nextFloat() - 0.5f) * randomness * 0.5;
+                offsetZ += (random.nextFloat() - 0.5f) * randomness * 0.5;
+            }
 
             BlockPos trunkPos = new BlockPos(
                     startPos.getX() + (int) Math.round(offsetX),
                     startPos.getY() + i,
                     startPos.getZ() + (int) Math.round(offsetZ)
             );
+
+            // Validiere Position (verhindere zu extreme Abweichungen)
+            if (Math.abs(trunkPos.getX() - startPos.getX()) > height ||
+                    Math.abs(trunkPos.getZ() - startPos.getZ()) > height) {
+                // Fallback zur letzten gültigen Position
+                trunkPos = new BlockPos(lastPos.getX(), startPos.getY() + i, lastPos.getZ());
+            }
 
             // Platziere Stamm-Block
             placeLog(level, blockSetter, random, trunkPos, config);
@@ -104,7 +111,7 @@ public class CurvedPalmTrunkPlacer extends TrunkPlacer {
             lastPos = trunkPos;
         }
 
-        // Rückgabe der Krone-Position
+        // Rückgabe der Krone-Position - etwas höher für bessere Blätter-Platzierung
         return ImmutableList.of(new FoliagePlacer.FoliageAttachment(lastPos.above(), 0, false));
     }
 
@@ -115,22 +122,23 @@ public class CurvedPalmTrunkPlacer extends TrunkPlacer {
             return directions[curveDirection];
         }
 
+        // Random direction (-1 oder ungültiger Wert)
         return directions[random.nextInt(directions.length)];
     }
 
     private double calculateCurveOffset(double progress, double totalCurve, int height) {
-        // Verschiedene Kurven-Arten
+        // Verschiedene Kurven-Arten basierend auf curve_strength
         if (curveStrength < 0.5f) {
             // Leichte Biegung - linear
             return progress * totalCurve;
         } else if (curveStrength < 1.0f) {
-            // Mittlere Biegung - quadratisch
+            // Mittlere Biegung - quadratisch (beschleunigt am Ende)
             return Math.pow(progress, 1.5) * totalCurve;
         } else if (curveStrength < 1.5f) {
             // Starke Biegung - S-Kurve
             return calculateSCurve(progress) * totalCurve;
         } else {
-            // Sehr starke Biegung - exponentiell
+            // Sehr starke Biegung - exponentiell mit Wellenbewegung
             return (Math.pow(progress, 0.7) - 0.3 * Math.sin(progress * Math.PI)) * totalCurve;
         }
     }
@@ -148,7 +156,7 @@ public class CurvedPalmTrunkPlacer extends TrunkPlacer {
         int deltaY = to.getY() - from.getY();
         int deltaZ = to.getZ() - from.getZ();
 
-        // Fülle Lücken wenn die Distanz zu groß ist
+        // Fülle Lücken wenn die horizontale Distanz zu groß ist
         int maxDistance = Math.max(Math.abs(deltaX), Math.abs(deltaZ));
         if (maxDistance > 1) {
             // Interpoliere zwischen den Positionen
@@ -163,5 +171,18 @@ public class CurvedPalmTrunkPlacer extends TrunkPlacer {
                 placeLog(level, blockSetter, random, interpPos, config);
             }
         }
+    }
+
+    // Getter methods for codec access
+    public float getCurveStrength() {
+        return curveStrength;
+    }
+
+    public int getCurveDirection() {
+        return curveDirection;
+    }
+
+    public float getRandomness() {
+        return randomness;
     }
 }
