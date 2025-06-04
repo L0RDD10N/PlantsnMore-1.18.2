@@ -1,0 +1,23 @@
+{
+	"credit": "Made with Blockbench",
+	"texture_size": [32, 32],
+	"textures": {
+		"0": "plantsnmore:block/coconut_tree",
+		"particle": "minecraft:block/oak_log"
+	},
+	"elements": [
+		{
+			"from": [4, 8, 4],
+			"to": [12, 16, 12],
+			"rotation": {"angle": 0, "axis": "y", "origin": [6, 2, -5]},
+			"faces": {
+				"north": {"uv": [8, 4, 4, 8], "texture": "#0"},
+				"east": {"uv": [4, 4, 8, 8], "texture": "#0"},
+				"south": {"uv": [8, 4, 4, 8], "texture": "#0"},
+				"west": {"uv": [4, 4, 8, 8], "texture": "#0"},
+				"up": {"uv": [4, 0, 8, 4], "texture": "#0"},
+				"down": {"uv": [4, 0, 8, 4], "texture": "#0"}
+			}
+		}
+	]
+}

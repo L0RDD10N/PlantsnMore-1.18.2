@@ -7,10 +7,10 @@ import com.mods.plantsnmore.recipe.ModRecipes;
 import com.mods.plantsnmore.screen.ModMenuTypes;
 import com.mods.plantsnmore.screen.PlantStationScreen;
 import com.mods.plantsnmore.world.feature.ModConfiguredFeatures;
-import com.mods.plantsnmore.world.feature.ModPlacedFeatures;
-import com.mods.plantsnmore.world.feature.tree.ModFoliagePlacers;
 import com.mods.plantsnmore.world.feature.tree.ModTreeDecorators;
 import com.mods.plantsnmore.world.feature.tree.ModTrunkPlacers;
+import com.mods.plantsnmore.world.feature.tree.ModFoliagePlacers;
+import com.mods.plantsnmore.world.feature.ModPlacedFeatures;
 import com.mojang.logging.LogUtils;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
@@ -47,10 +47,10 @@ public class PlantsnMore {
 
         ModRecipes.register(eventBus);
 
-        // Register tree-related features
-        ModTreeDecorators.TREE_DECORATORS.register(eventBus);
-        ModFoliagePlacers.FOLIAGE_PLACERS.register(eventBus);
         ModTrunkPlacers.register(eventBus);
+        ModFoliagePlacers.register(eventBus);
+        ModTreeDecorators.register(eventBus);
+
 
         MinecraftForge.EVENT_BUS.register(this);
     }
@@ -69,8 +69,10 @@ public class PlantsnMore {
         ItemBlockRenderTypes.setRenderLayer(ModBlocks.PLANT_STATION_WARPED.get(), RenderType.translucent());
         ItemBlockRenderTypes.setRenderLayer(ModBlocks.PLANT_STATION_BIRCH.get(), RenderType.translucent());
 
-        ItemBlockRenderTypes.setRenderLayer(ModBlocks.COCO_PALM_LEAVES.get(), RenderType.cutout());
+        ItemBlockRenderTypes.setRenderLayer(ModBlocks.COCONUT_TREE.get(), RenderType.translucent());
+
         ItemBlockRenderTypes.setRenderLayer(ModBlocks.COCO_PALM_SAPLING.get(), RenderType.cutout());
+        ItemBlockRenderTypes.setRenderLayer(ModBlocks.COCO_PALM_LEAVES.get(), RenderType.cutout());
 
         MenuScreens.register(ModMenuTypes.PLANT_STATION_MENU.get(), PlantStationScreen::new);
     }

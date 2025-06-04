@@ -1,6 +1,7 @@
 package com.mods.plantsnmore.block;
 
 import com.mods.plantsnmore.PlantsnMore;
+import com.mods.plantsnmore.block.custom.CoconutTreeBlock;
 import com.mods.plantsnmore.block.custom.ModFlammableRotatedPillarBlock;
 import com.mods.plantsnmore.block.custom.PlantStationBlock;
 import com.mods.plantsnmore.item.ModCreativeModeTab;
@@ -60,6 +61,9 @@ public class ModBlocks {
             () -> new PlantStationBlock(BlockBehaviour.Properties.copy(Blocks.CRAFTING_TABLE).noOcclusion()), ModCreativeModeTab.MISC_TAB);
     public static final RegistryObject<Block> PLANT_STATION_SPRUCE = registerBlock("plant_station_spruce",
             () -> new PlantStationBlock(BlockBehaviour.Properties.copy(Blocks.CRAFTING_TABLE).noOcclusion()), ModCreativeModeTab.MISC_TAB);
+
+    public static final RegistryObject<Block> COCONUT_TREE = registerBlock("coconut_tree",
+            () -> new CoconutTreeBlock(BlockBehaviour.Properties.copy(Blocks.CRAFTING_TABLE).noOcclusion()), ModCreativeModeTab.MISC_TAB);
 
 
     public static final RegistryObject<Block> COCO_PALM_LOG = registerBlock("coco_palm_log",

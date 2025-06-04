@@ -2,6 +2,7 @@ package com.mods.plantsnmore.block.custom.entity;
 
 import com.mods.plantsnmore.PlantsnMore;
 import com.mods.plantsnmore.block.ModBlocks;
+import com.mods.plantsnmore.block.custom.entity.custom.CoconutTreeBlockEntity;
 import com.mods.plantsnmore.block.custom.entity.custom.PlantStationBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -25,6 +26,13 @@ public class ModBlockEntities {
                             ModBlocks.PLANT_STATION_ACACIA.get(),
                             ModBlocks.PLANT_STATION_CRIMSON.get(),
                             ModBlocks.PLANT_STATION_WARPED.get()
+                    ).build(null));
+
+
+    public static final RegistryObject<BlockEntityType<CoconutTreeBlockEntity>> COCONUTS =
+            BLOCK_ENTITIES.register("coconuts", () ->
+                    BlockEntityType.Builder.of(CoconutTreeBlockEntity::new,
+                            ModBlocks.COCONUT_TREE.get()
                     ).build(null));
 
     public static void register(IEventBus eventBus) {

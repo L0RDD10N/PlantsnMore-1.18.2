@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model" :  "plantsnmore:block/coconut_tree" },
+    "facing=east": { "model" :  "plantsnmore:block/coconut_tree", "y": 90 },
+    "facing=south": { "model" :  "plantsnmore:block/coconut_tree", "y": 180 },
+    "facing=west": { "model" :  "plantsnmore:block/coconut_tree", "y":  270}
+  }
+}

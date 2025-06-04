@@ -1,6 +1,6 @@
 package com.mods.plantsnmore.world.feature.tree;
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
@@ -17,26 +17,23 @@ import java.util.Random;
 import java.util.function.BiConsumer;
 
 public class CurvedPalmTrunkPlacer extends TrunkPlacer {
-
     public static final Codec<CurvedPalmTrunkPlacer> CODEC = RecordCodecBuilder.create((instance) -> {
-        return trunkPlacerParts(instance).and(
-                instance.group(
-                        Codec.floatRange(0.0f, 2.0f).fieldOf("curve_strength").forGetter(placer -> placer.curveStrength),
-                        Codec.intRange(-1, 3).fieldOf("curve_direction").forGetter(placer -> placer.curveDirection), // -1 for random
-                        Codec.floatRange(0.0f, 1.0f).fieldOf("randomness").forGetter(placer -> placer.randomness)
-                )
-        ).apply(instance, CurvedPalmTrunkPlacer::new);
+        return trunkPlacerParts(instance).and(instance.group(
+                Codec.floatRange(0.1F, 3.0F).fieldOf("bend_strength").forGetter((placer) -> placer.bendStrength),
+                Codec.intRange(-1, 5).fieldOf("bend_direction").forGetter((placer) -> placer.bendDirection),
+                Codec.floatRange(0.0F, 1.0F).fieldOf("randomness").forGetter((placer) -> placer.randomness)
+        )).apply(instance, CurvedPalmTrunkPlacer::new);
     });
 
-    private final float curveStrength; // 0.0 = gerade, 2.0 = stark gekrümmt
-    private final int curveDirection; // -1 = random, 0-3 für Hauptrichtungen (N,S,E,W)
-    private final float randomness; // Zufällige Variation
+    private final float bendStrength;
+    private final int bendDirection; // -1 = random, 0 = North, 1 = South, 2 = East, 3 = West
+    private final float randomness;
 
     public CurvedPalmTrunkPlacer(int baseHeight, int heightRandA, int heightRandB,
-                                 float curveStrength, int curveDirection, float randomness) {
+                                 float bendStrength, int bendDirection, float randomness) {
         super(baseHeight, heightRandA, heightRandB);
-        this.curveStrength = curveStrength;
-        this.curveDirection = curveDirection;
+        this.bendStrength = bendStrength;
+        this.bendDirection = bendDirection;
         this.randomness = randomness;
     }
 
@@ -46,143 +43,212 @@ public class CurvedPalmTrunkPlacer extends TrunkPlacer {
     }
 
     @Override
-    public List<FoliagePlacer.FoliageAttachment> placeTrunk(LevelSimulatedReader level,
-                                                            BiConsumer<BlockPos, BlockState> blockSetter,
-                                                            Random random, int height, BlockPos startPos,
-                                                            TreeConfiguration config) {
+    public List<FoliagePlacer.FoliageAttachment> placeTrunk(LevelSimulatedReader level, BiConsumer<BlockPos, BlockState> blockSetter,
+                                                            Random random, int height, BlockPos startPos, TreeConfiguration config) {
 
-        Direction curveDir = getCurveDirection(random);
-        setDirtAt(level, blockSetter, random, startPos.below(), config);
+        List<FoliagePlacer.FoliageAttachment> foliageAttachments = Lists.newArrayList();
 
-        // Aktuelle Position für den Stamm
-        double currentX = startPos.getX();
-        double currentZ = startPos.getZ();
+        // Determine bend direction with better randomization
+        Direction bendDir = getBendDirection(random);
 
-        // Curve-Parameter mit etwas mehr Variation
-        double totalCurve = curveStrength + (random.nextFloat() - 0.5f) * randomness;
+        // Add secondary curve direction for more natural S-curves
+        Direction secondaryDir = null;
+        if (bendStrength > 1.5f && random.nextFloat() < 0.6f) {
+            secondaryDir = getPerpendicularDirection(bendDir, random);
+        }
 
-        BlockPos lastPos = startPos;
+        double currentX = 0.0;
+        double currentZ = 0.0;
+        BlockPos currentPos = startPos;
 
+        // Track curve intensity for natural tapering
+        double maxCurveReached = 0.0;
+
+        // Place the trunk with improved natural curve
         for (int i = 0; i < height; i++) {
-            double progress = (double) i / height;
+            // Calculate curve progression with more natural curves
+            double progress = (double) i / (double) height;
 
-            // Berechne Krümmung (verschiedene Kurven-Arten je nach Stärke)
-            double curveOffset = calculateCurveOffset(progress, totalCurve, height);
+            // Primary curve - starts gentle, peaks in middle-upper section, then continues
+            double primaryCurve = calculateNaturalCurve(progress, bendStrength);
 
-            // Anwenden der Krümmung in die gewählte Richtung
-            double offsetX = 0;
-            double offsetZ = 0;
+            // Track maximum curve for coco wood placement
+            maxCurveReached = Math.max(maxCurveReached, Math.abs(primaryCurve));
 
-            switch (curveDir) {
-                case NORTH: offsetZ = -curveOffset; break;
-                case SOUTH: offsetZ = curveOffset; break;
-                case EAST: offsetX = curveOffset; break;
-                case WEST: offsetX = -curveOffset; break;
-                default: break; // Fallback für unerwartete Richtungen
+            // Add natural randomness with noise-like variation
+            if (random.nextFloat() < randomness) {
+                double noiseVariation = (random.nextGaussian() * 0.15) * bendStrength;
+                primaryCurve += noiseVariation;
             }
 
-            // Kleine zufällige Variation für natürlicheren Look
-            if (randomness > 0) {
-                offsetX += (random.nextFloat() - 0.5f) * randomness * 0.5;
-                offsetZ += (random.nextFloat() - 0.5f) * randomness * 0.5;
+            // Apply micro-adjustments for more organic growth
+            if (i > 2 && random.nextFloat() < 0.3f) {
+                primaryCurve += Math.sin(i * 0.8) * 0.1 * bendStrength;
             }
 
-            BlockPos trunkPos = new BlockPos(
-                    startPos.getX() + (int) Math.round(offsetX),
-                    startPos.getY() + i,
-                    startPos.getZ() + (int) Math.round(offsetZ)
-            );
+            // FIXED: Apply directional movement correctly by updating the variables
+            currentX += getDirectionalMovementX(bendDir, primaryCurve);
+            currentZ += getDirectionalMovementZ(bendDir, primaryCurve);
 
-            // Validiere Position (verhindere zu extreme Abweichungen)
-            if (Math.abs(trunkPos.getX() - startPos.getX()) > height ||
-                    Math.abs(trunkPos.getZ() - startPos.getZ()) > height) {
-                // Fallback zur letzten gültigen Position
-                trunkPos = new BlockPos(lastPos.getX(), startPos.getY() + i, lastPos.getZ());
+            // Apply secondary curve for S-shape if present
+            if (secondaryDir != null && i > height * 0.4) {
+                double secondaryCurve = Math.sin((progress - 0.4) * Math.PI * 1.5) * bendStrength * 0.4;
+                currentX += getDirectionalMovementX(secondaryDir, secondaryCurve);
+                currentZ += getDirectionalMovementZ(secondaryDir, secondaryCurve);
             }
 
-            // Platziere Stamm-Block
-            placeLog(level, blockSetter, random, trunkPos, config);
-
-            // Fülle Lücken zwischen den Positionen wenn nötig
-            if (i > 0) {
-                fillGapsBetweenPositions(level, blockSetter, random, lastPos, trunkPos, config);
+            // Apply wind-like sway for very tall palms
+            if (height > 8 && i > height * 0.6) {
+                double swayIntensity = (progress - 0.6) * 0.3 * bendStrength;
+                double swayX = Math.sin(i * 0.5) * swayIntensity;
+                double swayZ = Math.cos(i * 0.7) * swayIntensity;
+                currentX += swayX;
+                currentZ += swayZ;
             }
 
-            lastPos = trunkPos;
+            // Calculate final block position
+            int blockX = (int) Math.round(currentX);
+            int blockZ = (int) Math.round(currentZ);
+            currentPos = startPos.offset(blockX, i, blockZ);
+
+            // Determine block type based on position and curve intensity
+            BlockState trunkBlock = getTrunkBlockForPosition(i, height, progress, maxCurveReached, config, random);
+
+            // Place the trunk block
+            blockSetter.accept(currentPos, trunkBlock);
+
+            // Add foliage attachments for crown area with better distribution
+            if (shouldAddFoliageAttachment(i, height, progress)) {
+                foliageAttachments.add(new FoliagePlacer.FoliageAttachment(currentPos.above(), 0, false));
+            }
+
+            // Add supporting structure for heavily curved sections
+            addSupportingBlocks(level, blockSetter, currentPos, progress, maxCurveReached, config, random);
         }
 
-        // Rückgabe der Krone-Position - etwas höher für bessere Blätter-Platzierung
-        return ImmutableList.of(new FoliagePlacer.FoliageAttachment(lastPos.above(), 0, false));
+        // Always add the final crown position
+        foliageAttachments.add(new FoliagePlacer.FoliageAttachment(currentPos.above(), 0, false));
+
+        return foliageAttachments;
     }
 
-    private Direction getCurveDirection(Random random) {
-        Direction[] directions = {Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST};
-
-        if (curveDirection >= 0 && curveDirection < directions.length) {
-            return directions[curveDirection];
-        }
-
-        // Random direction (-1 oder ungültiger Wert)
-        return directions[random.nextInt(directions.length)];
-    }
-
-    private double calculateCurveOffset(double progress, double totalCurve, int height) {
-        // Verschiedene Kurven-Arten basierend auf curve_strength
-        if (curveStrength < 0.5f) {
-            // Leichte Biegung - linear
-            return progress * totalCurve;
-        } else if (curveStrength < 1.0f) {
-            // Mittlere Biegung - quadratisch (beschleunigt am Ende)
-            return Math.pow(progress, 1.5) * totalCurve;
-        } else if (curveStrength < 1.5f) {
-            // Starke Biegung - S-Kurve
-            return calculateSCurve(progress) * totalCurve;
+    private Direction getBendDirection(Random random) {
+        if (bendDirection == -1) {
+            return Direction.Plane.HORIZONTAL.getRandomDirection(random);
         } else {
-            // Sehr starke Biegung - exponentiell mit Wellenbewegung
-            return (Math.pow(progress, 0.7) - 0.3 * Math.sin(progress * Math.PI)) * totalCurve;
+            // Ensure valid direction mapping
+            Direction[] directions = {Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST};
+            int dirIndex = Math.max(0, Math.min(3, bendDirection));
+            return directions[dirIndex];
         }
     }
 
-    private double calculateSCurve(double progress) {
-        // Smooth S-curve using sigmoid function
-        double x = (progress - 0.5) * 6; // Scale to make it more S-shaped
-        return 1.0 / (1.0 + Math.exp(-x)) - 0.5; // Center around 0
+    private Direction getPerpendicularDirection(Direction primary, Random random) {
+        switch (primary) {
+            case NORTH:
+            case SOUTH:
+                return random.nextBoolean() ? Direction.EAST : Direction.WEST;
+            case EAST:
+            case WEST:
+                return random.nextBoolean() ? Direction.NORTH : Direction.SOUTH;
+            default:
+                return Direction.EAST;
+        }
     }
 
-    private void fillGapsBetweenPositions(LevelSimulatedReader level, BiConsumer<BlockPos, BlockState> blockSetter,
-                                          Random random, BlockPos from, BlockPos to, TreeConfiguration config) {
-        // Berechne Distanz zwischen Positionen
-        int deltaX = to.getX() - from.getX();
-        int deltaY = to.getY() - from.getY();
-        int deltaZ = to.getZ() - from.getZ();
+    private double calculateNaturalCurve(double progress, float strength) {
+        // Natural palm curve: gentle start, stronger middle, continuing to top
+        double baseCurve = Math.pow(progress, 1.5) * strength;
 
-        // Fülle Lücken wenn die horizontale Distanz zu groß ist
-        int maxDistance = Math.max(Math.abs(deltaX), Math.abs(deltaZ));
-        if (maxDistance > 1) {
-            // Interpoliere zwischen den Positionen
-            for (int step = 1; step < maxDistance; step++) {
-                double progress = (double) step / maxDistance;
+        // Add natural growth variation
+        double growthVariation = Math.sin(progress * Math.PI * 0.8) * 0.2;
 
-                int interpX = from.getX() + (int) Math.round(deltaX * progress);
-                int interpY = from.getY() + (int) Math.round(deltaY * progress);
-                int interpZ = from.getZ() + (int) Math.round(deltaZ * progress);
+        return baseCurve + (growthVariation * strength);
+    }
 
-                BlockPos interpPos = new BlockPos(interpX, interpY, interpZ);
-                placeLog(level, blockSetter, random, interpPos, config);
+    // FIXED: Separate methods for X and Z movement
+    private double getDirectionalMovementX(Direction direction, double intensity) {
+        switch (direction) {
+            case EAST:
+                return intensity;
+            case WEST:
+                return -intensity;
+            default:
+                return 0.0;
+        }
+    }
+
+    private double getDirectionalMovementZ(Direction direction, double intensity) {
+        switch (direction) {
+            case SOUTH:
+                return intensity;
+            case NORTH:
+                return -intensity;
+            default:
+                return 0.0;
+        }
+    }
+
+    private BlockState getTrunkBlockForPosition(int currentHeight, int totalHeight, double progress,
+                                                double maxCurve, TreeConfiguration config, Random random) {
+
+        // Use coco palm wood for curved sections and upper trunk
+        boolean useCocoPalmWood = false;
+
+        // Upper portion of trunk (crown area)
+        if (progress > 0.7) {
+            useCocoPalmWood = true;
+        }
+
+        // Heavily curved sections
+        else if (maxCurve > 1.0 && progress > 0.4) {
+            useCocoPalmWood = true;
+        }
+
+        // Very curved sections always use coco wood
+        else if (maxCurve > 2.0 && progress > 0.2) {
+            useCocoPalmWood = true;
+        }
+
+        // Random transition for natural look
+        else if (progress > 0.5 && random.nextFloat() < 0.3) {
+            useCocoPalmWood = true;
+        }
+
+        if (useCocoPalmWood) {
+            // Assuming you have a coco palm wood block - replace with your actual block
+            // return ModBlocks.COCO_PALM_WOOD.get().defaultBlockState();
+            // For now, using the regular trunk provider
+            return config.trunkProvider.getState(random, new BlockPos(0, currentHeight, 0));
+        }
+
+        return config.trunkProvider.getState(random, new BlockPos(0, currentHeight, 0));
+    }
+
+    private boolean shouldAddFoliageAttachment(int currentHeight, int totalHeight, double progress) {
+        // Add foliage attachments in the crown area with better distribution
+        if (progress >= 0.75) return true;  // Upper quarter always
+        if (progress >= 0.6 && currentHeight % 2 == 0) return true;  // Every other block in upper section
+        return false;
+    }
+
+    private void addSupportingBlocks(LevelSimulatedReader level, BiConsumer<BlockPos, BlockState> blockSetter,
+                                     BlockPos trunkPos, double progress, double maxCurve,
+                                     TreeConfiguration config, Random random) {
+
+        // Add occasional supporting bark or root-like structures for very curved palms
+        if (maxCurve > 2.0 && progress < 0.3 && random.nextFloat() < 0.15) {
+            // Add small supporting blocks at the base for stability
+            for (Direction dir : Direction.Plane.HORIZONTAL) {
+                if (random.nextFloat() < 0.4) {
+                    BlockPos supportPos = trunkPos.relative(dir);
+                    // Only place if position is reasonable
+                    if (Math.abs(supportPos.getX() - trunkPos.getX()) <= 1 &&
+                            Math.abs(supportPos.getZ() - trunkPos.getZ()) <= 1) {
+                        blockSetter.accept(supportPos, config.trunkProvider.getState(random, supportPos));
+                    }
+                }
             }
         }
-    }
-
-    // Getter methods for codec access
-    public float getCurveStrength() {
-        return curveStrength;
-    }
-
-    public int getCurveDirection() {
-        return curveDirection;
-    }
-
-    public float getRandomness() {
-        return randomness;
     }
 }

@@ -3,150 +3,84 @@ package com.mods.plantsnmore.world.feature.gen;
 import com.mods.plantsnmore.world.feature.ModConfiguredFeatures;
 import com.mods.plantsnmore.world.feature.ModPlacedFeatures;
 import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraftforge.event.world.BiomeLoadingEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
 
-@Mod.EventBusSubscriber
+import java.util.List;
+import java.util.Set;
+
 public class ModTreeGeneration {
 
-    @SubscribeEvent
-    public static void onBiomeLoading(BiomeLoadingEvent event) {
-        generatePalmTrees(event);
+    // Biomes where palm trees should generate
+    private static final Set<ResourceKey<Biome>> TROPICAL_BIOMES = Set.of(
+            Biomes.BEACH,
+            Biomes.DESERT,
+            Biomes.WARM_OCEAN,
+            Biomes.LUKEWARM_OCEAN,
+            Biomes.JUNGLE,
+            Biomes.BAMBOO_JUNGLE,
+            Biomes.SAVANNA,
+            Biomes.SAVANNA_PLATEAU
+    );
+
+    private static final Set<ResourceKey<Biome>> BEACH_BIOMES = Set.of(
+            Biomes.BEACH,
+            Biomes.WARM_OCEAN,
+            Biomes.LUKEWARM_OCEAN
+    );
+
+    private static final Set<ResourceKey<Biome>> DESERT_BIOMES = Set.of(
+            Biomes.DESERT
+    );
+
+    public static void generateTrees(BiomeLoadingEvent event) {
+        ResourceKey<Biome> biomeKey = ResourceKey.create(Registry.BIOME_REGISTRY, event.getName());
+
+        if (biomeKey == null) return;
+
+        // Generate palm trees in tropical biomes
+        if (TROPICAL_BIOMES.contains(biomeKey)) {
+            generateTropicalPalms(event);
+        }
+
+        // Special generation for beach biomes
+        if (BEACH_BIOMES.contains(biomeKey)) {
+            generateBeachPalms(event);
+        }
+
+        // Special generation for desert biomes
+        if (DESERT_BIOMES.contains(biomeKey)) {
+            generateDesertPalms(event);
+        }
     }
 
-    public static void generatePalmTrees(final BiomeLoadingEvent event) {
-        ResourceKey<Biome> biomeKey = ResourceKey.create(
-                net.minecraft.core.Registry.BIOME_REGISTRY,
-                event.getName()
-        );
+    private static void generateTropicalPalms(BiomeLoadingEvent event) {
+        // Add various palm groups to tropical biomes
+        List<Holder<PlacedFeature>> vegDecoration = event.getGeneration().getFeatures(GenerationStep.Decoration.VEGETAL_DECORATION);
 
-        // Standard Strand-Palmen in Beach-Biomen
-        if (isBeachBiome(event, biomeKey)) {
-            event.getGeneration().addFeature(GenerationStep.Decoration.VEGETAL_DECORATION,
-                    ModPlacedFeatures.COCO_PALM_BEACH_PLACED.getHolder().get());
-
-            // Seltener: Gekrümmte Palmen für mehr Variation
-            event.getGeneration().addFeature(GenerationStep.Decoration.VEGETAL_DECORATION,
-                    ModPlacedFeatures.CURVED_PALM_BEACH_PLACED.getHolder().get());
-        }
-
-        // Sturm-gebeutelte Palmen an windigen Küsten
-        if (isStormyCoastBiome(event, biomeKey)) {
-            event.getGeneration().addFeature(GenerationStep.Decoration.VEGETAL_DECORATION,
-                    ModPlacedFeatures.STORM_PALM_COAST_PLACED.getHolder().get());
-        }
-
-        // Seltene Oasen-Palmen in Wüsten
-        if (isDesertBiome(event, biomeKey)) {
-            event.getGeneration().addFeature(GenerationStep.Decoration.VEGETAL_DECORATION,
-                    ModPlacedFeatures.COCO_PALM_OASIS_PLACED.getHolder().get());
-        }
-
-        // Häufigere tropische Palmen in Dschungel-Biomen
-        if (isTropicalBiome(event, biomeKey)) {
-            event.getGeneration().addFeature(GenerationStep.Decoration.VEGETAL_DECORATION,
-                    ModPlacedFeatures.COCO_PALM_TROPICAL_PLACED.getHolder().get());
-        }
+        // Add palm groups with different rarities
+        vegDecoration.add(ModPlacedFeatures.TROPICAL_PALM_GROUP_COMMON.getHolder().get());
+        vegDecoration.add(ModPlacedFeatures.TROPICAL_PALM_GROUP_PLACED.getHolder().get());
+        vegDecoration.add(ModPlacedFeatures.COCONUT_PALM_GROVE_PLACED.getHolder().get());
     }
 
-    private static boolean isBeachBiome(BiomeLoadingEvent event, ResourceKey<Biome> biomeKey) {
-        Biome.BiomeCategory category = event.getCategory();
-        String biomeName = event.getName().toString();
+    private static void generateBeachPalms(BiomeLoadingEvent event) {
+        // Beach-specific palm generation
+        List<Holder<PlacedFeature>> vegDecoration = event.getGeneration().getFeatures(GenerationStep.Decoration.VEGETAL_DECORATION);
 
-        // Vanilla Beach-Biome
-        if (biomeKey.equals(Biomes.BEACH) ||
-                biomeKey.equals(Biomes.WARM_OCEAN) ||
-                biomeKey.equals(Biomes.LUKEWARM_OCEAN)) {
-            return true;
-        }
-
-        // Kategorie-basierte Erkennung
-        if (category == Biome.BiomeCategory.BEACH) {
-            return true;
-        }
-
-        // String-basierte Erkennung für Mod-Biome
-        return biomeName.contains("beach") ||
-                biomeName.contains("shore") ||
-                biomeName.contains("coast") ||
-                (biomeName.contains("ocean") && event.getClimate().temperature > 0.5f);
+        vegDecoration.add(ModPlacedFeatures.BEACH_PALM_CLUSTER_PLACED.getHolder().get());
+        vegDecoration.add(ModPlacedFeatures.WINDSWEPT_PALM_GROUP_PLACED.getHolder().get());
     }
 
-    private static boolean isStormyCoastBiome(BiomeLoadingEvent event, ResourceKey<Biome> biomeKey) {
-        String biomeName = event.getName().toString();
+    private static void generateDesertPalms(BiomeLoadingEvent event) {
+        // Desert oasis palm generation
+        List<Holder<PlacedFeature>> vegDecoration = event.getGeneration().getFeatures(GenerationStep.Decoration.VEGETAL_DECORATION);
 
-        // Vanilla windige Küsten-Biome
-        if (biomeKey.equals(Biomes.STONY_SHORE) ||
-                biomeKey.equals(Biomes.WINDSWEPT_HILLS) ||
-                biomeKey.equals(Biomes.WINDSWEPT_FOREST) ||
-                biomeKey.equals(Biomes.WINDSWEPT_GRAVELLY_HILLS)) {
-            return true;
-        }
-
-        // String-basierte Erkennung
-        return biomeName.contains("windswept") ||
-                biomeName.contains("windy") ||
-                biomeName.contains("stormy") ||
-                (biomeName.contains("cliff") && event.getClimate().temperature > 0.3f);
-    }
-
-    private static boolean isDesertBiome(BiomeLoadingEvent event, ResourceKey<Biome> biomeKey) {
-        Biome.BiomeCategory category = event.getCategory();
-        String biomeName = event.getName().toString();
-
-        // Vanilla Wüsten-Biome
-        if (biomeKey.equals(Biomes.DESERT) ||
-                biomeKey.equals(Biomes.WARM_OCEAN)) {
-            return true;
-        }
-
-        // Kategorie-basierte Erkennung
-        if (category == Biome.BiomeCategory.DESERT) {
-            return true;
-        }
-
-        // String-basierte Erkennung für warme, trockene Biome
-        return biomeName.contains("desert") ||
-                (biomeName.contains("sand") && event.getClimate().temperature > 0.8f) ||
-                (category == Biome.BiomeCategory.MESA && event.getClimate().downfall < 0.3f);
-    }
-
-    private static boolean isTropicalBiome(BiomeLoadingEvent event, ResourceKey<Biome> biomeKey) {
-        Biome.BiomeCategory category = event.getCategory();
-        String biomeName = event.getName().toString();
-        Biome.ClimateSettings climate = event.getClimate();
-
-        // Vanilla tropische Biome
-        if (biomeKey.equals(Biomes.JUNGLE) ||
-                biomeKey.equals(Biomes.SPARSE_JUNGLE) ||
-                biomeKey.equals(Biomes.BAMBOO_JUNGLE) ||
-                biomeKey.equals(Biomes.SAVANNA) ||
-                biomeKey.equals(Biomes.SAVANNA_PLATEAU) ||
-                biomeKey.equals(Biomes.WINDSWEPT_SAVANNA)) {
-            return true;
-        }
-
-        // Kategorie-basierte Erkennung mit Temperaturcheck
-        if (category == Biome.BiomeCategory.JUNGLE && climate.temperature > 0.7f) {
-            return true;
-        }
-
-        if (category == Biome.BiomeCategory.SAVANNA &&
-                climate.temperature > 0.8f && climate.downfall > 0.3f) {
-            return true;
-        }
-
-        // String-basierte Erkennung für warme, feuchte Biome
-        return (biomeName.contains("jungle") ||
-                biomeName.contains("tropical") ||
-                biomeName.contains("rainforest") ||
-                (biomeName.contains("savanna") && climate.temperature > 0.8f)) &&
-                climate.temperature > 0.7f && climate.downfall > 0.2f;
+        vegDecoration.add(ModPlacedFeatures.DESERT_OASIS_PALMS_PLACED.getHolder().get());
     }
 }
